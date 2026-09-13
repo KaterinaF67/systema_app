@@ -8,7 +8,8 @@
   <title>Система</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="styles.css?v=4" />
+  <link rel="stylesheet" href="styles.css?v=6" />
+  <link rel="stylesheet" href="progress.css?v=6" />
 </head>
 <body>
   <div class="ambient" aria-hidden="true"></div>
@@ -23,6 +24,7 @@
         <button class="nav-button" data-view="habits"><img src="assets/icons/check.svg" alt="" /><span>Привычки</span></button>
         <button class="nav-button" data-view="day"><img src="assets/icons/timer.svg" alt="" /><span>План дня</span></button>
         <button class="nav-button" data-view="calendar"><img src="assets/icons/calendar.svg" alt="" /><span>Месяц / год</span></button>
+        <button class="nav-button" data-view="goals"><img src="assets/icons/star.svg" alt=""/><span>Цели</span></button>
         <button class="nav-button" data-view="analytics"><img src="assets/icons/chart.svg" alt="" /><span>Аналитика</span></button>
         <button class="nav-button" data-view="history"><img src="assets/icons/history.svg" alt="" /><span>История</span></button>
         <button class="nav-button" data-view="settings"><img src="assets/icons/settings.svg" alt="" /><span>Настройки</span></button>
@@ -74,6 +76,7 @@
             <div id="overviewTasksEmpty" class="empty-state hidden"><p>Дел на сегодня нет.</p><button class="secondary-button" data-open="task">Добавить</button></div>
           </article>
         </div>
+        <article class="panel overview-goals"><div class="section-head"><div><span class="section-kicker">НАПРАВЛЕНИЕ</span><h2>Мои цели</h2></div><button class="text-button" data-view-target="goals">Все цели →</button></div><div id="overviewGoalItems" class="overview-goal-items"></div></article>
       </section>
 
       <section class="view" id="habitsView">
@@ -173,36 +176,25 @@
       </section>
 
       <section class="view" id="analyticsView">
-        <div class="view-controls panel analytics-controls">
-          <div class="segmented" id="analyticsRange"><button data-range="7">7 дней</button><button class="active" data-range="30">30 дней</button><button data-range="90">90 дней</button><button data-range="365">Год</button></div>
-          <select id="analyticsHabitSelect"><option value="all">Все привычки</option></select>
-          <div class="segmented" id="analyticsMetric"><button class="active" data-metric="percent">Проценты</button><button data-metric="count">Количество</button></div>
+        <p class="progress-intro">Твой ритм — день за днём. Одна клеточка — один день, один цвет — одна привычка.</p>
+        <div class="progress-toolbar">
+          <div class="segmented" id="analyticsPeriod"><button data-calendar-period="month">Месяц</button><button class="active" data-calendar-period="year">Год</button></div>
+          <div class="progress-period"><button class="icon-button" id="analyticsPrev" aria-label="Предыдущий период">‹</button><strong id="analyticsPeriodLabel"></strong><button class="icon-button" id="analyticsNext" aria-label="Следующий период">›</button><button class="text-button" id="analyticsToday">Сейчас</button></div>
+          <div class="progress-options"><input type="search" id="analyticsSearch" placeholder="Найти привычку" aria-label="Найти привычку"/><label class="toggle-row"><input type="checkbox" id="analyticsArchived"/>С архивом</label></div>
         </div>
-        <div class="analytics-kpis">
-          <article class="panel"><span>Среднее выполнение привычек</span><strong id="kpiHabitRate">0%</strong><small>среднее по выбранным дням</small></article>
-          <article class="panel"><span>Привычки выполнены</span><strong id="kpiHabitDone">0 / 0</strong><small>полностью закрытые отметки</small></article>
-          <article class="panel"><span>Дела выполнены</span><strong id="kpiTaskDone">0 / 0</strong><small>из всех запланированных дел</small></article>
-          <article class="panel"><span>Лучшая серия</span><strong id="kpiStreak">0</strong><small>дней подряд</small></article>
-        </div>
-        <article class="panel chart-panel analytics-main-chart">
-          <div class="section-head">
-            <div><span class="section-kicker">ДИНАМИКА</span><h2 id="analyticsChartTitle">Выполнение по дням</h2></div>
-            <div class="chart-legend"><span><i class="legend-habit"></i>привычки</span><span><i class="legend-task"></i>дела</span></div>
-          </div>
-          <div id="completionChart" class="svg-chart"></div>
-        </article>
-        <div class="analytics-grid analytics-secondary">
-          <article class="panel chart-panel">
-            <div class="section-head"><div><span class="section-kicker">СТРУКТУРА</span><h2>Дни по результату</h2></div></div>
-            <div class="donut-layout"><div id="analyticsDonut" class="analytics-donut"><strong id="analyticsDonutValue">0%</strong><span>полных дней</span></div><div id="analyticsDonutLegend" class="donut-legend"></div></div>
-          </article>
-          <article class="panel chart-panel"><div class="section-head"><div><span class="section-kicker">ПРИВЫЧКИ</span><h2>Рейтинг</h2></div></div><div id="habitRanking"></div></article>
-        </div>
-        <article class="panel chart-panel analytics-calendar-panel">
-          <div class="section-head"><div><span class="section-kicker">КАЛЕНДАРЬ</span><h2>Карта выполнения</h2></div><div class="calendar-legend"><span><i class="cal-complete"></i>выполнено</span><span><i class="cal-partial"></i>частично</span><span><i class="cal-missed"></i>пропущено</span><span><i class="cal-empty"></i>нет плана</span></div></div>
-          <div id="activityHeatmap" class="activity-heatmap"></div>
-        </article>
+        <div id="analyticsInsights" class="analytics-insights"></div>
+        <div class="progress-legend"><span><i></i>Выполнено</span><span><i class="legend-partial"></i>Частично</span><span><i class="legend-blank"></i>Нет отметки</span><span><i class="legend-future"></i>Будущий день</span></div>
+        <div id="habitCalendars" class="habit-calendars"></div>
       </section>
+
+      <section class="view" id="goalsView">
+        <div class="goals-heading"><div><p class="progress-intro">Большие планы и маленькие «хочу». Запиши мысль, выбери срок, когда будешь готова, и сделай первый шаг.</p><p id="goalCount" class="backup-status"></p></div><button class="primary-button" data-new-goal>＋ Новая цель</button></div>
+        <div class="goals-filters" id="goalFilters"><button class="active" data-goal-filter="all">Все планы</button><button data-goal-filter="week">Неделя</button><button data-goal-filter="month">Месяц</button><button data-goal-filter="year">Год</button><button data-goal-filter="none">Без срока</button><button data-goal-filter="completed">Завершено</button><button data-goal-filter="archived">Архив</button></div>
+        <input type="search" id="goalSearch" class="goal-search" placeholder="Найти цель или мысль" aria-label="Найти цель или мысль"/>
+        <p id="goalsFilterNote" class="goal-form-note" style="margin-top:12px"></p>
+        <div id="goalList" class="goal-list"></div>
+      </section>
+
 
       <section class="view" id="historyView">
         <div class="history-layout">
@@ -220,6 +212,7 @@
           <article class="panel settings-card"><span class="section-kicker">ТЕМА</span><h2>Цвет интерфейса</h2><div class="theme-options" id="themeOptions"><button data-theme="neon"><i></i><span>Неон</span></button><button data-theme="calm"><i></i><span>Графит</span></button><button data-theme="blue"><i></i><span>Сине-зелёный</span></button></div></article>
           <article class="panel settings-card"><span class="section-kicker">ФОН</span><h2>Оформление</h2><div class="background-options" id="backgroundOptions"><button data-bg="noise"><img src="assets/backgrounds/noise.svg" alt="" /><span>Графит</span></button><button data-bg="grid"><img src="assets/backgrounds/grid.svg" alt="" /><span>Сетка</span></button><button data-bg="navy"><img src="assets/backgrounds/navy.svg" alt="" /><span>Синий</span></button></div><label class="file-label">Своя картинка<input id="customBackground" type="file" accept="image/*" /></label><button class="text-button danger" id="removeBackground">Удалить свою картинку</button></article>
           <article class="panel settings-card"><span class="section-kicker">ДАННЫЕ</span><h2>Выгрузка и копия</h2><p>JSON сохраняет приложение целиком. CSV открывается в Excel.</p><button class="primary-button" id="exportJson">Скачать JSON</button><button class="secondary-button" id="exportCsv">Скачать CSV</button><label class="file-label">Импорт JSON<input id="importJson" type="file" accept="application/json,.json" /></label></article>
+          <article class="panel settings-card"><span class="section-kicker">СОХРАННОСТЬ</span><h2>Резервные копии</h2><p id="backupStatus" class="backup-status"></p><button class="secondary-button" id="downloadLegacyBackup">Копия до обновления</button><button class="secondary-button hidden" id="downloadImportBackup">Копия до импорта</button></article>
           <article class="panel settings-card danger-card"><span class="section-kicker">ОЧИСТКА</span><h2>Удалить данные</h2><p>Сначала скачай резервную копию.</p><button class="danger-button" id="resetData">Удалить всё</button></article>
         </div>
       </section>
@@ -230,11 +223,11 @@
     <button class="active" data-view="overview"><img src="assets/icons/list.svg" alt="" /><span>Обзор</span></button>
     <button data-view="habits"><img src="assets/icons/check.svg" alt="" /><span>Привычки</span></button>
     <button data-view="day"><img src="assets/icons/timer.svg" alt="" /><span>День</span></button>
-    <button data-view="calendar"><img src="assets/icons/calendar.svg" alt="" /><span>Календарь</span></button>
-    <button data-view="analytics"><img src="assets/icons/chart.svg" alt="" /><span>Графики</span></button>
+    <button data-view="goals"><img src="assets/icons/star.svg" alt="" /><span>Цели</span></button>
+    <button data-view="analytics"><img src="assets/icons/chart.svg" alt="" /><span>Аналитика</span></button>
   </nav>
 
-  <div class="drawer" id="drawer" aria-hidden="true"><button class="drawer-backdrop" id="drawerBackdrop"></button><div class="drawer-panel"><button data-view="history"><img src="assets/icons/history.svg" alt="" />История</button><button data-view="settings"><img src="assets/icons/settings.svg" alt="" />Настройки</button></div></div>
+  <div class="drawer" id="drawer" aria-hidden="true"><button class="drawer-backdrop" id="drawerBackdrop"></button><div class="drawer-panel"><button data-view="calendar"><img src="assets/icons/calendar.svg" alt=""/>Календарь</button><button data-view="history"><img src="assets/icons/history.svg" alt="" />История</button><button data-view="settings"><img src="assets/icons/settings.svg" alt="" />Настройки</button></div></div>
 
   <dialog class="modal" id="habitDialog">
     <form id="habitForm" method="dialog">
@@ -253,7 +246,7 @@
         <label class="full">Заметка<textarea id="habitNote" rows="2" maxlength="240" placeholder="Необязательно"></textarea></label>
         <label class="toggle-row full"><input id="habitSelectToday" type="checkbox" checked /><span>Добавить на выбранный день</span></label>
       </div>
-      <div class="modal-actions"><button type="button" class="danger-button hidden" id="deleteHabit">Удалить</button><span></span><button type="button" class="secondary-button" data-close="habitDialog">Отмена</button><button type="submit" class="primary-button">Сохранить</button></div>
+      <div class="modal-actions"><button type="button" class="danger-button hidden" id="deleteHabit">В архив</button><span></span><button type="button" class="secondary-button" data-close="habitDialog">Отмена</button><button type="submit" class="primary-button">Сохранить</button></div>
     </form>
   </dialog>
 
@@ -282,7 +275,32 @@
     </form>
   </dialog>
 
-  <div class="toast" id="toast"></div>
-  <script src="app.js?v=4"></script>
+  <dialog class="modal" id="habitCellDialog">
+    <form id="habitCellForm"><div class="modal-head"><div><span class="section-kicker" id="cellDate"></span><h2 id="cellHabitName"></h2></div><button type="button" class="close-button" data-close="habitCellDialog" aria-label="Закрыть">×</button></div>
+      <p class="cell-context">Норма на этот день: <strong id="cellRule"></strong></p>
+      <label class="cell-check-control" id="cellCheckWrap"><input type="checkbox" id="cellChecked"/>Выполнено</label>
+      <label id="cellValueWrap"><span id="cellUnit">Значение</span><input id="cellValue" type="number" min="0" step="any"/></label>
+      <div class="modal-actions"><button type="button" class="text-button" id="clearCell">Очистить отметку</button><span></span><button type="button" class="secondary-button" data-close="habitCellDialog">Отмена</button><button class="primary-button" type="submit">Сохранить</button></div>
+    </form>
+  </dialog>
+  <dialog class="modal" id="goalDialog">
+    <form id="goalForm"><div class="modal-head"><div><span class="section-kicker">МОИ ПЛАНЫ</span><h2 id="goalDialogTitle">Новая цель</h2></div><button type="button" class="close-button" data-close="goalDialog" aria-label="Закрыть">×</button></div>
+      <input type="hidden" id="goalId"/>
+      <div class="form-grid"><label class="full">Чего хочется?<input id="goalTitle" required maxlength="160" placeholder="Например, закончить курс SQL" autofocus/></label>
+        <label>Когда?<select id="goalHorizon"><option value="none">Пока без срока</option><option value="week">До конца недели</option><option value="month">До конца месяца</option><option value="year">До конца года</option><option value="date">К определённой дате</option></select></label>
+        <label id="goalDueWrap" class="hidden">Срок<input id="goalDue" type="date"/></label>
+        <label class="full">Мысли и детали<textarea id="goalNote" rows="3" maxlength="4000" placeholder="Почему это важно? Что хочется получить? Можно просто записать мысль."></textarea></label>
+        <div class="full"><p class="goal-form-note">Шаги — необязательно. Их можно добавить в план дня.</p><div id="goalEditorSteps" class="goal-editor-steps"></div><button type="button" class="text-button" id="addGoalStep">＋ Добавить шаг</button></div>
+        <details class="full"><summary>Связать с привычками</summary><p class="goal-form-note">Какие привычки помогают тебе двигаться к этой цели?</p><div id="goalHabitOptions" class="goal-link-options"></div></details>
+      </div>
+      <div class="modal-actions"><button type="button" class="text-button hidden" id="archiveGoal">В архив</button><span></span><button type="button" class="secondary-button" data-close="goalDialog">Отмена</button><button type="submit" class="primary-button">Сохранить</button></div>
+    </form>
+  </dialog>
+  <dialog class="modal" id="planStepDialog">
+    <form id="planStepForm"><div class="modal-head"><div><span class="section-kicker">ШАГ К ЦЕЛИ</span><h2 id="planStepTitle"></h2></div><button type="button" class="close-button" data-close="planStepDialog" aria-label="Закрыть">×</button></div><label>На какой день?<input type="date" id="planStepDate" required/></label><p class="backup-status">Шаг появится в делах без времени. Его выполнение будет видно и в цели.</p><div class="modal-actions"><span></span><span></span><button type="button" class="secondary-button" data-close="planStepDialog">Отмена</button><button type="submit" class="primary-button">Добавить в план</button></div></form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js?v=5"></script>
 </body>
 </html>
